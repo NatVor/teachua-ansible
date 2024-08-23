@@ -1,0 +1,12 @@
+# ansible/roles/database/tasks/import.yml
+---
+
+- name: Import initial data
+  become: yes
+  mysql_db:
+    name: "{{ database_name }}"
+    state: import
+    target: "{{ data_file_path }}"
+    login_user: root
+    login_password: "{{ root_password }}"
+  tags: mariadb

@@ -1,0 +1,38 @@
+---
+- name: Ensure /tmp directory exists
+  ansible.builtin.file:
+    path: /tmp
+    state: directory
+    mode: '0755'
+
+#- name: Download Tomcat
+#  ansible.builtin.get_url:
+#    url: "{{ tomcat_download_url }}"
+#    dest: "/tmp/{{ tomcat_tarball_path }}"
+
+- name: Download Tomcat using wget
+  ansible.builtin.command:
+    cmd: "wget {{ tomcat_download_url }} -O {{ tomcat_tarball_path }}"
+
+- name: Extract Tomcat
+  ansible.builtin.unarchive:
+    src: "{{ tomcat_tarball_path }}"
+    dest: "/opt"
+    remote_src: yes
+
+- name: Create symbolic link to Tomcat
+  ansible.builtin.file:
+    src: "/opt/apache-tomcat-{{ tomcat_version }}"
+    dest: "{{ tomcat_install_dir }}"
+    state: link
+
+#- name: Start Tomcat
+#  ansible.builtin.systemd:
+#    name: tomcat
+#    state: started
+#    enabled: yes
+
+- name: Start Tomcat manually
+  ansible.builtin.shell:
+    cmd: "nohup /opt/apache-tomcat-{{ tomcat_version }}/bin/catalina.sh start > /opt/tomcat/logs/catalina.out 2>&1 &"
+    chdir: /opt/apache-tomcat-{{ tomcat_version }}

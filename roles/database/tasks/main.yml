@@ -1,0 +1,96 @@
+---
+
+- name: Install MariaDB server and Python MySQL client
+  ansible.builtin.package:
+    name:
+      - mariadb-server
+      - python3-mysqldb
+    state: latest
+ 
+- name: Start MariaDB
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Wait for MariaDB to start
+  ansible.builtin.wait_for:
+    port: 3306
+    state: started
+    timeout: 30
+
+- name: Create /root/.my.cnf with MySQL root credentials
+  copy:
+    dest: /root/.my.cnf
+    content: |
+      [client]
+      user=root
+      password={{ root_password }}
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Remove anonymous users
+  community.mysql.mysql_user:
+    name: ''
+    host: '%'
+    state: absent
+    login_user: root
+    login_password: "{{ root_password }}"
+
+- name: Remove test database
+  community.mysql.mysql_db:
+    name: "test"
+    state: absent
+    login_user: root
+    login_password: "{{ root_password }}"
+
+- name: Is root password set?
+  command: mysql -u root --execute "SELECT NOW()"
+  register: is_root_password_set
+  ignore_errors: yes   
+
+- name: Create MariaDB database
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    collation: utf8_bin
+    encoding: utf8
+    login_user: root
+    login_password: "{{ root_password }}"
+
+- name: Create user
+  community.mysql.mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ root_password }}"
+
+- name: Enable remote login to MySQL
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/my.cnf
+    regexp: '^bind-address\s*=\s*127.0.0.1'
+    line: 'bind-address = 0.0.0.0'
+    backup: yes
+  notify:
+    - Restart MySQL
+
+- name: Open port 3306 for MySQL with UFW
+  ansible.builtin.ufw:
+    rule: allow
+    port: 3306
+    proto: tcp
+
+- name: Copy data.sql to the server
+  ansible.builtin.copy:
+    src: "{{ sql_file }}"
+    dest: /tmp/data.sql
+    ignore_errors: yes
+
+- name: Import data.sql file into the database
+  ansible.builtin.shell: >
+    mysql -u {{ db_user }} -p{{ db_password }} {{ db_name }} < /tmp/data.sql
+  # when: db_import_needed.stdout == ''

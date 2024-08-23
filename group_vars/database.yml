@@ -1,0 +1,8 @@
+---
+# Database settings
+root_password: "root"
+user: "user"
+password: "password"
+db_name: "teachua"
+sql_file: "data.sql"
+#db_container_id: "1bb924e84b31" 

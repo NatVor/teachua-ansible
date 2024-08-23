@@ -1,0 +1,8 @@
+java_version: 17
+#mariadb_version: 10.5
+local_project_directory: "/workspaces/teachua-internship/teachua-backend"
+remote_project_directory: "/backend"
+jar_file: "dev.war"
+datasource_url: "jdbc:mariadb://localhost:3306/teachua"
+datasource_user: "user"
+datasource_password: "password"

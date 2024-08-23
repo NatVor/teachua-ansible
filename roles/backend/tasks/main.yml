@@ -1,0 +1,92 @@
+---
+
+- name: Start message
+  ansible.builtin.debug:
+    msg: "Create task to deploy backend"
+
+- name: Install Java 17
+  ansible.builtin.apt:
+    name: openjdk-17-jdk
+    state: present
+  become: true
+
+- name: Install Maven 3.6.3
+  ansible.builtin.apt:
+    name: maven
+    state: present
+  become: yes
+
+#- name: Checkout backend project
+#    ansible.builtin.git:
+#      repo: 'https:/...url.git'
+#      dest: "{{ project_directory }}"
+#      version: "main"
+
+- name: Copy backend project to target machine
+  ansible.builtin.synchronize:
+    src: "{{ local_project_directory }}/"
+    dest: "{{ remote_project_directory }}/"
+    delete: yes
+    recursive: yes
+
+- name: Build the project
+  ansible.builtin.command:
+    cmd: mvn clean package
+    chdir: "{{ remote_project_directory }}"
+
+- name: Copy application properties template
+  ansible.builtin.template:
+    src: application.properties.j2
+    dest: "{{ remote_project_directory }}/src/main/resources/application.properties"
+
+- name: Run the backend application
+  ansible.builtin.command:
+    cmd: java -jar target/{{ jar_file }}
+    chdir: "{{ remote_project_directory }}"
+  environment:
+    SPRING_PROFILES_ACTIVE: dev
+
+- name: Reload systemd and start backend service
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    name: teachua-backend
+    state: started
+    enabled: true
+
+#- name: Copy backend application
+#  ansible.builtin.copy:
+#    src: /workspaces/teachua-internship/teachua-backend-NatVor/target/dev.war
+#    dest: /target/dev.war
+
+#- name: Create systemd service for backend
+#  ansible.builtin.copy:
+#    dest: /etc/systemd/system/teachua-backend.service
+#    content: |
+#      [Unit]
+#      Description=Teachua Backend
+#      After=network.target
+
+#      [Service]
+#      User=root
+#      ExecStart=/usr/bin/java -jar /target/dev.war
+#      Restart=always
+#      Environment="JDBC_DRIVER={{ lookup('env', 'JDBC_DRIVER') }}"
+#      Environment="DATASOURCE_URL={{ lookup('env', 'DATASOURCE_URL') }}"
+#      Environment="DATASOURCE_USER={{ lookup('env', 'DATASOURCE_USER') }}"
+#      Environment="DATASOURCE_PASSWORD={{ lookup('env', 'DATASOURCE_PASSWORD') }}"
+      
+#      [Install]
+#      WantedBy=multi-user.target
+
+
+
+#- name: Setup Backend Configuration
+#  template:
+#    src: application.properties.j2
+#    dest: /workspaces/teachua-internship/teachua-backend/src/main/resources/application.properties
+
+#- name: Deploy Backend
+#  shell: |
+#    cd /workspaces/teachua-internship/teachua-backend
+#    mvn clean package
+#    java -jar target/dev.war

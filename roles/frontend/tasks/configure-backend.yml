@@ -1,0 +1,13 @@
+# ansible/roles/frontend/tasks/configure-backend.yml
+---
+
+- name: Set environment variable for backend server
+  ansible.builtin.lineinfile:
+    path: "{{ project_path }}/.env"
+    line: 'REACT_APP_ROOT_SERVER={{ backend_server_url }}'
+    create: yes
+
+- name: Start the frontend in development mode
+  ansible.builtin.command: npm run start
+  args:
+    chdir: "{{ project_path }}"

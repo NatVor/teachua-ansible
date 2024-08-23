@@ -1,0 +1,11 @@
+---
+- name: Create webapps directory if not present
+  ansible.builtin.file:
+    path: "{{ tomcat_install_dir }}/webapps"
+    state: directory
+
+- name: Copy WAR file to Tomcat webapps directory
+  ansible.builtin.copy:
+    src: "{{ app_war }}"
+    dest: "{{ tomcat_install_dir }}/webapps/{{ app_name }}.war"
+  become: yes

@@ -1,0 +1,26 @@
+---
+- name: Copy build files to local web server
+  ansible.builtin.copy:
+    src: "{{ project_path }}/build/"
+    dest: "/var/www/html"
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  become: yes
+#  when: is_local_webserver
+
+- name: Notify about deployment to development server
+  ansible.builtin.debug:
+    msg: "Project is running on http://localhost:3000"
+#  when: is_local_webserver
+
+#- name: Copy build files to remote web server
+#  ansible.builtin.copy:
+#    src: "{{ project_path }}/build/"
+#    dest: "{{ local_webserver_path }}"  # Змініть на відповідний шлях на віддаленому сервері
+#    owner: www-data
+#    group: www-data
+#    mode: '0755'
+#  delegate_to: webserver
+#  become: yes
+#  when: not is_local_webserver

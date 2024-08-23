@@ -1,0 +1,12 @@
+---
+- include_tasks: build-frontend.yml
+  tags: build-project
+
+- include_tasks: deploy_project.yml
+  tags: deploy-frontend
+
+- include_tasks: configure_backend.yml
+  tags: configure-backend
+
+- include_tasks: start-frontend.yml
+  tags: start-frontend

@@ -1,0 +1,7 @@
+# handlers/main.yml
+---
+# Example handler
+- name: restart backend service
+  service:
+    name: backend-service
+    state: restarted

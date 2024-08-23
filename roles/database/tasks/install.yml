@@ -1,0 +1,36 @@
+---
+- name: Install MariaDB Server and Python MySQL client
+  become: yes
+  apt:
+    pkg:
+      - mariadb-server
+      - python3-pymysql
+    update_cache: yes
+  tags: mariadb
+
+- name: Ensure MariaDB service is started (Debian/Ubuntu)
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+  become: yes
+  register: mariadb_result
+  failed_when: false
+
+- name: Ensure MySQL service is started (Alternative for some distros)
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  become: yes
+  when: mariadb_result.failed
+  register: mysql_result
+  failed_when: false
+  
+- name: Wait for MariaDB to be ready
+  wait_for:
+    port: 3306
+    state: started
+    delay: 10
+    timeout: 300
+  tags: mariadb

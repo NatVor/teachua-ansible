@@ -1,0 +1,13 @@
+# ansible/roles/database/tasks/import.yml
+---
+- name: Create database
+  become: yes
+  mysql_db:
+    name: "{{ database_name }}"
+    state: present
+    collation: utf8_bin
+    encoding: utf8
+    login_user: root
+    login_password: "{{ root_password }}"
+  tags: mariadb
+

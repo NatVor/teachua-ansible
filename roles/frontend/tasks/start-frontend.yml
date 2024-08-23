@@ -1,0 +1,5 @@
+---
+- name: Start the frontend in development mode
+  ansible.builtin.command: npm run start
+  args:
+    chdir: "{{ project_path }}"

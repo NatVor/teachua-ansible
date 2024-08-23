@@ -1,0 +1,93 @@
+---
+- name: Add NodeSource repository for Node.js 16.x
+  ansible.builtin.shell: curl -sL https://deb.nodesource.com/setup_16.x | bash -
+  args:
+    executable: /bin/bash
+  become: yes
+
+- name: Install Node.js 16
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+  become: yes
+
+- name: Install npm
+  ansible.builtin.apt:
+    name: npm
+    state: present
+  become: yes
+
+- name: Install project dependencies
+  ansible.builtin.npm:
+    path: "{{ project_path }}"
+    state: present
+
+- name: Build the project
+  ansible.builtin.command: npm run build
+  args:
+    chdir: "{{ project_path }}"
+  environment:
+    NODE_OPTIONS: "--openssl-legacy-provider"  
+
+
+
+
+#- name: Install Node.js 16 and npm
+#  apt:
+#    name:
+#      - nodejs
+#      - npm
+#    state: present
+
+#- name: Copy frontend application
+#  copy:
+#    src: /workspaces/teachua-internship/teachua-frontend-NatVor/
+#    dest: /opt/frontend/
+
+#- name: Install frontend dependencies
+#  command: npm install
+#  args:
+#    chdir: /opt/frontend
+
+#- name: Build frontend
+#  command: npm run build
+#  args:
+#    chdir: /opt/teachua-frontend
+#
+
+#- name: Create systemd service for frontend
+#  copy:
+#    dest: /etc/systemd/system/teachua-frontend.service
+#    content: |
+#      [Unit]
+#      Description=Teachua Frontend
+#      After=network.target
+
+#      [Service]
+#      User=root
+#      ExecStart=/usr/bin/npm start
+#      Restart=always
+#      Environment="REACT_APP_ROOT_SERVER=http://10.0.0.7:8080"
+#      WorkingDirectory=/opt/teachua-frontend
+
+#      [Install]
+#      WantedBy=multi-user.target
+
+#- name: Reload systemd and start frontend service
+#  systemd:
+#    daemon_reload: yes
+#    name: frontend
+#    state: started
+#    enabled: true
+
+
+
+
+
+
+#- name: Deploy Frontend
+#  shell: |
+#    cd /workspaces/teachua-internship/teachua-frontend
+#    npm install
+#    npm run build
+#    npm run start

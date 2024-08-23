@@ -1,0 +1,20 @@
+- name: Deploy Frontend
+  hosts: frontend
+  become: yes
+  roles:
+    - frontend
+
+- name: Deploy Frontend
+  hosts: frontend
+  become: yes
+  roles:
+    - frontend
+  tasks:
+    - name: Allow port 3000 for frontend application
+      iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 3000
+        jump: ACCEPT
+    - name: Save iptables rules
+      command: iptables-save

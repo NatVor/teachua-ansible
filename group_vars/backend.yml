@@ -1,0 +1,40 @@
+# Variables for downloading and configuring Tomcat
+
+# Version of Tomcat
+tomcat_version: "9.0.91"
+
+# Name of the Tomcat archive
+tomcat_tarball: "apache-tomcat-{{ tomcat_version }}.tar.gz"
+
+# URL for downloading Tomcat
+tomcat_download_url: "https://downloads.apache.org/tomcat/tomcat-9/v9.0.91/bin/apache-tomcat-9.0.91.tar.gz"
+
+# Directory where Tomcat will be extracted
+tomcat_install_dir: "/opt/tomcat"
+
+# Location for storing the downloaded Tomcat archive
+tomcat_tarball_path: "/tmp/{{ tomcat_tarball }}"
+
+# Port on which Tomcat will run
+tomcat_port: 8080
+
+# Path to the WAR file
+app_war: "/vagrant_data/teachua-backend/target/dev.war"
+app_name: dev
+
+# Database connection settings
+jdbc_driver: "org.mariadb.jdbc.Driver" # or "com.mysql.cj.jdbc.Driver"
+db_url: "jdbc:mysql://172.18.0.4:3306/teachua" # ?useUnicode=true&serverTimezone=UTC"
+db_user: "user"
+db_password: "password"
+
+# Configuration for the application.properties file for my backend
+application_properties:
+  jdbc_driver: "{{ jdbc_driver }}"
+  datasource_url: "{{ db_url }}"
+  datasource_user: "{{ db_user }}"
+  datasource_password: "{{ db_password }}"
+
+# Tomcat service settings
+tomcat_service_name: "tomcat"
+tomcat_service_start: "start"  # Can be "start", "restart", "stop"
